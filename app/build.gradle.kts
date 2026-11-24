@@ -1,7 +1,7 @@
 plugins {
-    id("com.google.gms.google-services")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -65,4 +65,6 @@ dependencies {
 
     // Iconos extendidos (recomendado para tener acceso a todo el catálogo)
     implementation("androidx.compose.material:material-icons-extended")
+
+    implementation("com.google.firebase:firebase-auth")
 }
