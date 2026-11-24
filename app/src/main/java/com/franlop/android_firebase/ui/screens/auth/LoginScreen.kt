@@ -1,6 +1,7 @@
 package com.franlop.android_firebase.ui.screens.auth
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -114,7 +115,9 @@ fun LoginScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavC
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = {
-
+                    scope.launch {
+                        emailPassSignIn(email, password, auth, analytics, context, navigation)
+                    }
                 },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
@@ -128,9 +131,7 @@ fun LoginScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavC
         ClickableText(
             text = AnnotatedString("¿Olvidaste tu contraseña?"),
             onClick = {
-                navigation.navigate(Routes.ForgotPassword.route) {
-                    popUpTo(Routes.Login.route) { inclusive = true }
-                }
+                navigation.navigate(Routes.ForgotPassword.route)
                 analytics.logButtonClicked("Click: ¿Olvidaste tu contraseña?")
             },
             style = TextStyle(
@@ -212,6 +213,34 @@ private suspend fun incognitoSignIn(
         }
         is AuthRes.Error -> {
             analytics.logError("Error SignIn Incognito: ${result.errorMessage}")
+        }
+    }
+}
+
+private suspend fun emailPassSignIn(
+    email: String,
+    password: String,
+    auth: AuthManager,
+    analytics: AnalyticsManager,
+    context: Context,
+    navigation: NavController
+) {
+    if (email.isBlank() || password.isBlank()) {
+        Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+        return
+    }
+    when (val result = auth.signInWithEmailAndPassword(email, password)) {
+        is AuthRes.Success -> {
+            analytics.logButtonClicked("Click: Iniciar sesión")
+            navigation.navigate(Routes.Home.route) {
+                popUpTo(Routes.Login.route) {
+                    inclusive = true
+                }
+            }
+        }
+        is AuthRes.Error -> {
+            analytics.logError("Error SignIn Email/Password: ${result.errorMessage}")
+            Toast.makeText(context, result.errorMessage, Toast.LENGTH_LONG).show()
         }
     }
 }

@@ -64,6 +64,7 @@ import com.franlop.android_firebase.utils.AuthManager
 fun HomeScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavController) {
     analytics.logScreenView(screenName = Routes.Home.route)
     val navController = rememberNavController()
+    val user = auth.getCurrentUser()
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -87,15 +88,27 @@ fun HomeScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavCo
 
 
                         Spacer(modifier = Modifier.width(10.dp))
+                        if (user?.photoUrl != null) {
+                        } else {
+                            Image(
+                                painter = painterResource(id = R.drawable.profile),
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "Bienvenidx",
+                                text = if (!user?.displayName.isNullOrEmpty()) "Hola ${user.displayName}" else "Bienvenidx",
                                 fontSize = 20.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "Usuario",
+                                text = if (!user?.email.isNullOrEmpty()) "${user.email}" else "Anónimo",
                                 fontSize = 12.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis)

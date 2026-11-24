@@ -1,5 +1,7 @@
 package com.franlop.android_firebase.ui.screens.auth
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,9 +37,12 @@ import androidx.navigation.NavController
 import com.franlop.android_firebase.ui.navigation.Routes
 import com.franlop.android_firebase.ui.theme.Purple40
 import com.franlop.android_firebase.utils.AnalyticsManager
+import com.franlop.android_firebase.utils.AuthManager
+import com.franlop.android_firebase.utils.AuthRes
+import kotlinx.coroutines.launch
 
 @Composable
-fun SignUpScreen(analytics: AnalyticsManager, navigation: NavController) {
+fun SignUpScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavController) {
     analytics.logScreenView(screenName = Routes.SignUp.route)
 
     val context = LocalContext.current
@@ -74,7 +79,9 @@ fun SignUpScreen(analytics: AnalyticsManager, navigation: NavController) {
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = {
-
+                    scope.launch {
+                        signUp(email, password, auth, analytics, context, navigation)
+                    }
                 },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
@@ -94,9 +101,34 @@ fun SignUpScreen(analytics: AnalyticsManager, navigation: NavController) {
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Default,
-                textDecoration = TextDecoration.Underline,
-                color = Purple40
+            textDecoration = TextDecoration.Underline,
+            color = Purple40
             )
         )
+    }
+}
+
+private suspend fun signUp(
+    email: String,
+    password: String,
+    auth: AuthManager,
+    analytics: AnalyticsManager,
+    context: Context,
+    navigation: NavController
+) {
+    if (email.isBlank() || password.isBlank()) {
+        Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+        return
+    }
+    when (val result = auth.createUserWithEmailAndPassword(email, password)) {
+        is AuthRes.Success -> {
+            analytics.logButtonClicked("Click: Registrarse")
+            Toast.makeText(context, "Usuario creado correctamente", Toast.LENGTH_SHORT).show()
+            navigation.popBackStack()
+        }
+        is AuthRes.Error -> {
+            analytics.logError("Error SignUp: ${result.errorMessage}")
+            Toast.makeText(context, result.errorMessage, Toast.LENGTH_LONG).show()
+        }
     }
 }
