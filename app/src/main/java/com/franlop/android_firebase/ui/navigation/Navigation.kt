@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseUser
 fun Navigation(context: Context, navController: NavHostController = rememberNavController()) {
     var analytics: AnalyticsManager = AnalyticsManager(context)
 
-    val authManager = AuthManager()
+    val authManager: AuthManager = AuthManager(context)
     val user: FirebaseUser? = authManager.getCurrentUser()
 
     Screen {

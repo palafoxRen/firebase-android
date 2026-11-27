@@ -89,6 +89,18 @@ fun HomeScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavCo
 
                         Spacer(modifier = Modifier.width(10.dp))
                         if (user?.photoUrl != null) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(user.photoUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Imagen",
+                                placeholder = painterResource(id = R.drawable.profile),
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .size(40.dp)
+                            )
                         } else {
                             Image(
                                 painter = painterResource(id = R.drawable.profile),

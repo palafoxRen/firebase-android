@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.franlop.android_firebase"
+        applicationId = "com.renata.android_firebase"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
@@ -20,7 +20,27 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("debugCustom") {
+            val customKeystore = file("../keystore/debug.keystore")
+            if (customKeystore.exists()) {
+                storeFile = customKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            val customKeystore = file("../keystore/debug.keystore")
+            signingConfig = if (customKeystore.exists()) {
+                signingConfigs.getByName("debugCustom")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+        }
         release {
             optimization {
                 enable = true
@@ -67,4 +87,10 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     implementation("com.google.firebase:firebase-auth")
+
+    implementation("com.google.android.gms:play-services-auth:21.6.0")
+
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

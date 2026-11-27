@@ -157,7 +157,9 @@ fun LoginScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavC
         Spacer(modifier = Modifier.height(15.dp))
         SocialMediaButton(
             onClick = {
-
+                scope.launch {
+                    googleSignIn(auth, analytics, context, navigation)
+                }
             },
             text = "Continuar con Google",
             icon = R.drawable.ic_google,
@@ -192,6 +194,29 @@ fun SocialMediaButton(onClick: () -> Unit, text: String, icon: Int, color: Color
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = "$text", color = if(icon == R.drawable.ic_incognito) Color.White else Color.Black)
             click = true
+        }
+    }
+}
+
+private suspend fun googleSignIn(
+    auth: AuthManager,
+    analytics: AnalyticsManager,
+    context: Context,
+    navigation: NavController
+) {
+    when (val result = auth.signInWithGoogleModern(context)) {
+        is AuthRes.Success -> {
+            analytics.logButtonClicked("Click: Iniciar sesión con Google")
+            Toast.makeText(context, "Bienvenidx", Toast.LENGTH_SHORT).show()
+            navigation.navigate(Routes.Home.route) {
+                popUpTo(Routes.Login.route) {
+                    inclusive = true
+                }
+            }
+        }
+        is AuthRes.Error -> {
+            analytics.logError("Error SignIn Google: ${result.errorMessage}")
+            Toast.makeText(context, "Error: ${result.errorMessage}", Toast.LENGTH_LONG).show()
         }
     }
 }
