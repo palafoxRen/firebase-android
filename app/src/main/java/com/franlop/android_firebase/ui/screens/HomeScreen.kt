@@ -1,5 +1,6 @@
 package com.franlop.android_firebase.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,16 +55,18 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.franlop.android_firebase.R
 import com.franlop.android_firebase.ui.navigation.Routes
-import com.franlop.android_firebase.ui.screens.login.ContactsScreen
-import com.franlop.android_firebase.ui.screens.login.NotesScreen
+import com.franlop.android_firebase.ui.screens.db.ContactsScreen
+import com.franlop.android_firebase.ui.screens.db.NotesScreen
 import com.franlop.android_firebase.utils.AnalyticsManager
 import com.franlop.android_firebase.utils.AuthManager
+import com.franlop.android_firebase.utils.RealtimeManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavController) {
     analytics.logScreenView(screenName = Routes.Home.route)
     val navController = rememberNavController()
+    val context = LocalContext.current
     val user = auth.getCurrentUser()
 
     var showDialog by remember { mutableStateOf(false) }
@@ -150,7 +153,7 @@ fun HomeScreen(analytics: AnalyticsManager, auth: AuthManager, navigation: NavCo
                     showDialog = false
                 }, onDismiss = { showDialog = false })
             }
-            BottomNavGraph(navController = navController)
+            BottomNavGraph(navController = navController, context = context, authManager = auth)
         }
     }
 }
@@ -217,10 +220,11 @@ fun RowScope.AddItem(screens: BottomNavScreen, currentDestination: NavDestinatio
 }
 
 @Composable
-fun BottomNavGraph(navController: NavHostController) {
+fun BottomNavGraph(navController: NavHostController, context: Context, authManager: AuthManager) {
+    val realtime = RealtimeManager(context)
     NavHost(navController = navController, startDestination = BottomNavScreen.Contact.route) {
         composable(route = BottomNavScreen.Contact.route) {
-            ContactsScreen()
+            ContactsScreen(realtime = realtime, authManager = authManager)
         }
         composable(route = BottomNavScreen.Note.route) {
             NotesScreen()
